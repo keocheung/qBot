@@ -43,7 +43,7 @@ func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 	params.Set("reverse", strconv.FormatBool(options.Reverse))
 	u.RawQuery = params.Encode()
 	rsp, err := c.httpClient.Get(u.String(), map[string]string{
-		"SID": c.config.APIKey,
+		"Cookie": "SID=" + c.config.APIKey,
 	})
 	if err != nil {
 		log.Printf("httpClient.Get error: %v", err)
@@ -68,7 +68,7 @@ func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit
 	data := fmt.Sprintf("hashes=%s&ratioLimit=%f&seedingTimeLimit=%d",
 		strings.Join(hashes, "|"), ratioLimit, timeLimit)
 	_, err = c.httpClient.Post(u.String(), []byte(data), map[string]string{
-		"SID":          c.config.APIKey,
+		"Cookie":       "SID=" + c.config.APIKey,
 		"Content-Type": "application/x-www-form-urlencoded",
 	})
 	if err != nil {
