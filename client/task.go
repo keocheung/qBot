@@ -41,8 +41,9 @@ var limitShareRatio = func(config model.Config, qbClient QbClient) error {
 		return err
 	}
 	for _, torrent := range torrents {
-		if torrent.MaxRatio == -1 && (util.StringArraysHasCommon(config.RatioLimitTags, strings.Split(torrent.Tags, ",")) ||
-			util.StringsContain(config.RatioLimitCatogories, torrent.Category)) {
+		if torrent.MaxRatio == -1 &&
+			(len(config.RatioLimitTags) > 0 && util.StringArraysHasCommon(config.RatioLimitTags, strings.Split(torrent.Tags, ",")) ||
+				len(config.RatioLimitCatogories) > 0 && util.StringsContain(config.RatioLimitCatogories, torrent.Category)) {
 			err := qbClient.SetShareLimits([]string{torrent.Hash}, 2.0, torrent.MaxSeedingTime)
 			if err != nil {
 				log.Printf("set share limit for %s error: %v", torrent.Hash, err)
