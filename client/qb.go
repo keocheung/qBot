@@ -18,20 +18,22 @@ type QbClient interface {
 	SetShareLimits(hashes []string, ratioLimit float32, timeLimit int) error
 }
 
-func NewQbClient(config model.Config) QbClient {
+func NewQbClient(webURL, apiKey string) QbClient {
 	return &qbClient{
-		config:     config,
+		webURL:     webURL,
+		apiKey:     apiKey,
 		httpClient: NewHTTPClient(),
 	}
 }
 
 type qbClient struct {
-	config     model.Config
+	webURL     string
+	apiKey     string
 	httpClient HTTPClient
 }
 
 func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
-	u, err := url.Parse(c.config.WebURL)
+	u, err := url.Parse(c.webURL)
 	if err != nil {
 		log.Printf("url.Parse error: %v", err)
 		return nil, err
@@ -43,7 +45,7 @@ func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 	params.Set("reverse", strconv.FormatBool(options.Reverse))
 	u.RawQuery = params.Encode()
 	rsp, err := c.httpClient.Get(u.String(), map[string]string{
-		"Cookie": "SID=" + c.config.APIKey,
+		"Cookie": "SID=" + c.apiKey,
 	})
 	if err != nil {
 		log.Printf("httpClient.Get error: %v", err)
@@ -59,7 +61,7 @@ func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 }
 
 func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit int) error {
-	u, err := url.Parse(c.config.WebURL)
+	u, err := url.Parse(c.webURL)
 	if err != nil {
 		log.Printf("url.Parse error: %v", err)
 		return err
@@ -68,7 +70,7 @@ func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit
 	data := fmt.Sprintf("hashes=%s&ratioLimit=%f&seedingTimeLimit=%d",
 		strings.Join(hashes, "|"), ratioLimit, timeLimit)
 	_, err = c.httpClient.Post(u.String(), []byte(data), map[string]string{
-		"Cookie":       "SID=" + c.config.APIKey,
+		"Cookie":       "SID=" + c.apiKey,
 		"Content-Type": "application/x-www-form-urlencoded",
 	})
 	if err != nil {

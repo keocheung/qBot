@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"qb-monitor/client"
 	"qb-monitor/model"
@@ -14,8 +15,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config error: %v", err)
 	}
-	qbClient := client.NewQbClient(config)
-	taskManager := client.NewTaskManager(qbClient)
+	log.Printf("config loaded: %+v", config)
+	qbClient := client.NewQbClient(config.WebURL, config.APIKey)
+	taskManager := client.NewTaskManager(config, qbClient)
 	taskManager.Start()
 }
 
@@ -24,9 +26,10 @@ func loadConfig() (model.Config, error) {
 	if webURL == "" {
 		return model.Config{}, fmt.Errorf("WEB_URL not set")
 	}
-	apiKey := os.Getenv("API_KEY")
 	return model.Config{
-		WebURL: webURL,
-		APIKey: apiKey,
+		WebURL:               webURL,
+		APIKey:               os.Getenv("API_KEY"),
+		RatioLimitTags:       strings.Split(os.Getenv("RATIO_LIMIT_TAGS"), ","),
+		RatioLimitCatogories: strings.Split(os.Getenv("RATIO_LIMIT_CATOGORIES"), ","),
 	}, nil
 }
