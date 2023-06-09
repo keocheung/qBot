@@ -2,12 +2,12 @@ package client
 
 import (
 	"log"
-	"strings"
 	"sync"
 	"time"
 
 	"qb-monitor/model"
-	"qb-monitor/util"
+
+	"github.com/antonmedv/expr"
 )
 
 // TaskManager is the task manager of qb-monitor
@@ -23,14 +23,13 @@ func NewTaskManager(config model.Config, qbClient QbClient) TaskManager {
 		tasks:    []func(config model.Config, qbClient QbClient) error{},
 	}
 	taskManager.tasks = []func(config model.Config, qbClient QbClient) error{
-		limitShareRatio,
+		checkTorrent,
 	}
 	return taskManager
 }
 
-// Limit the share ratio to a certain value for certain torrents
-var limitShareRatio = func(config model.Config, qbClient QbClient) error {
-	log.Printf("task limitShareRatio started")
+var checkTorrent = func(conf model.Config, qbClient QbClient) error {
+	log.Printf("task checkTorrent started")
 	torrents, err := qbClient.GetTorrents(model.Options{
 		Limit:   10,
 		Sort:    "added_on",
@@ -41,18 +40,31 @@ var limitShareRatio = func(config model.Config, qbClient QbClient) error {
 		return err
 	}
 	for _, torrent := range torrents {
-		if torrent.MaxRatio == -1 &&
-			(len(config.RatioLimitTags) > 0 && util.StringArraysHasCommon(config.RatioLimitTags, strings.Split(torrent.Tags, ",")) ||
-				len(config.RatioLimitCatogories) > 0 && util.StringsContain(config.RatioLimitCatogories, torrent.Category)) {
-			err := qbClient.SetShareLimits([]string{torrent.Hash}, 2.0, torrent.MaxSeedingTime)
+		for _, rule := range conf.Rules {
+			res, err := expr.Run(rule.Evaluator, torrent)
 			if err != nil {
+				log.Printf("eval rule error: %v", err)
+				continue
+			}
+			if res == false {
+				continue
+			}
+			if err := execTorrentAction(qbClient, torrent, rule.Action); err != nil {
 				log.Printf("set share limit for %s error: %v", torrent.Hash, err)
-			} else {
-				log.Printf("set share limit to 2.0 for %s (%s)", torrent.Hash, torrent.Name)
 			}
 		}
 	}
-	log.Printf("task limitShareRatio finished")
+	log.Printf("task checkTorrent finished")
+	return nil
+}
+
+func execTorrentAction(qbClient QbClient, torrent model.Torrent, action model.TorrentAction) error {
+	if action.MaxRatio != nil {
+		if err := qbClient.SetShareLimits([]string{torrent.Hash}, *action.MaxRatio, torrent.MaxSeedingTime); err != nil {
+			return err
+		}
+		log.Printf("set share limit for %s (%s) to %f", torrent.Hash, torrent.Name, *action.MaxRatio)
+	}
 	return nil
 }
 
@@ -68,16 +80,16 @@ func (t *taskManager) Start() {
 	var wg sync.WaitGroup
 	for _, task := range t.tasks {
 		wg.Add(1)
-		go func() {
+		go func(f func(config model.Config, qbClient QbClient) error) {
 			defer wg.Done()
 			for {
-				err := task(t.config, t.qbClient)
+				err := f(t.config, t.qbClient)
 				if err != nil {
-					log.Printf("task error: %v", err)
+					log.Printf("Error running task: %v", err)
 				}
 				time.Sleep(10 * time.Minute)
 			}
-		}()
+		}(task)
 	}
 	wg.Wait()
 }

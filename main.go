@@ -1,13 +1,22 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
-	"strings"
 
 	"qb-monitor/client"
 	"qb-monitor/model"
+
+	"github.com/antonmedv/expr"
+)
+
+const (
+	webURLEnvKey      = "WEB_URL"
+	configPathEnvKey  = "CONFIG_PATH"
+	defaultConfigPath = "./config.json"
 )
 
 func main() {
@@ -22,14 +31,28 @@ func main() {
 }
 
 func loadConfig() (model.Config, error) {
-	webURL := os.Getenv("WEB_URL")
+	webURL := os.Getenv(webURLEnvKey)
 	if webURL == "" {
 		return model.Config{}, fmt.Errorf("WEB_URL not set")
 	}
-	return model.Config{
-		WebURL:               webURL,
-		APIKey:               os.Getenv("API_KEY"),
-		RatioLimitTags:       strings.Split(os.Getenv("RATIO_LIMIT_TAGS"), ","),
-		RatioLimitCatogories: strings.Split(os.Getenv("RATIO_LIMIT_CATOGORIES"), ","),
-	}, nil
+	configPath := os.Getenv(configPathEnvKey)
+	if configPath == "" {
+		configPath = defaultConfigPath
+	}
+	configFile, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		return model.Config{}, fmt.Errorf("Read from config file error: %v", err)
+	}
+	var c model.Config
+	if err := json.Unmarshal(configFile, &c); err != nil {
+		return model.Config{}, fmt.Errorf("Unmarshal config file error: %v", err)
+	}
+	for _, v := range c.Rules {
+		evaluator, err := expr.Compile(v.Condition)
+		if err != nil {
+			return model.Config{}, fmt.Errorf("Compile rule (%s) error: %v", v.Condition, err)
+		}
+		v.Evaluator = evaluator
+	}
+	return c, nil
 }

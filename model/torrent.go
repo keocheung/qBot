@@ -1,14 +1,29 @@
 package model
 
+import (
+	"strings"
+)
+
 // Torrent is a qBittorrent torrent
 type Torrent struct {
 	Hash           string  `json:"hash"`             // Torrent hash
 	Name           string  `json:"name"`             // Torrent name
 	Category       string  `json:"category"`         // Category of the torrent
-	Tags           string  `json:"tags"`             // Comma-concatenated tag list of the torrent
+	Tags           Tags    `json:"tags"`             // Comma-concatenated tag list of the torrent
 	Ratio          float32 `json:"ratio"`            // Torrent share ratio. Max ratio value: 9999
 	MaxRatio       float32 `json:"max_ratio"`        // Maximum share ratio until torrent is stopped from seeding/uploading
 	MaxSeedingTime int     `json:"max_seeding_time"` // Maximum seeding time (seconds) until torrent is stopped from seeding
+}
+
+type TorrentAction struct {
+	MaxRatio *float32 `json:"max_ratio"`
+}
+
+type Tags []string
+
+func (t *Tags) UnmarshalJSON(b []byte) error {
+	*t = strings.Split(string(b), ",")
+	return nil
 }
 
 // Options is the query options	for GetTorrents
