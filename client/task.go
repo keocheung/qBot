@@ -92,7 +92,7 @@ func (t *taskManager) Start() {
 				if err != nil {
 					log.Printf("Error running task: %v", err)
 				}
-				time.Sleep(10 * time.Second)
+				time.Sleep(10 * time.Minute)
 			}
 		}(task)
 	}
