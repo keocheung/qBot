@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -16,20 +17,23 @@ type TaskManager interface {
 }
 
 // NewTaskManager creates a new task manager
-func NewTaskManager(config model.Config, qbClient QbClient) TaskManager {
+func NewTaskManager(config *model.Config, qbClient QbClient) TaskManager {
 	taskManager := &taskManager{
 		config:   config,
 		qbClient: qbClient,
-		tasks:    []func(config model.Config, qbClient QbClient) error{},
+		tasks:    []func(config *model.Config, qbClient QbClient) error{},
 	}
-	taskManager.tasks = []func(config model.Config, qbClient QbClient) error{
+	taskManager.tasks = []func(config *model.Config, qbClient QbClient) error{
 		checkTorrent,
 	}
 	return taskManager
 }
 
-var checkTorrent = func(conf model.Config, qbClient QbClient) error {
+var checkTorrent = func(conf *model.Config, qbClient QbClient) error {
 	log.Printf("task checkTorrent started")
+	if conf == nil {
+		return fmt.Errorf("config is nil")
+	}
 	torrents, err := qbClient.GetTorrents(model.Options{
 		Limit:   10,
 		Sort:    "added_on",
@@ -69,9 +73,9 @@ func execTorrentAction(qbClient QbClient, torrent model.Torrent, action model.To
 }
 
 type taskManager struct {
-	config   model.Config
+	config   *model.Config
 	qbClient QbClient
-	tasks    []func(config model.Config, qbClient QbClient) error
+	tasks    []func(config *model.Config, qbClient QbClient) error
 }
 
 // Start starts the task manager
@@ -80,14 +84,15 @@ func (t *taskManager) Start() {
 	var wg sync.WaitGroup
 	for _, task := range t.tasks {
 		wg.Add(1)
-		go func(f func(config model.Config, qbClient QbClient) error) {
+		go func(f func(config *model.Config, qbClient QbClient) error) {
 			defer wg.Done()
 			for {
+				log.Printf("running task, config: %+v", t.config)
 				err := f(t.config, t.qbClient)
 				if err != nil {
 					log.Printf("Error running task: %v", err)
 				}
-				time.Sleep(10 * time.Minute)
+				time.Sleep(10 * time.Second)
 			}
 		}(task)
 	}
