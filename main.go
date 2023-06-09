@@ -11,16 +11,21 @@ import (
 	"qb-monitor/model"
 
 	"github.com/antonmedv/expr"
+	"github.com/fsnotify/fsnotify"
 )
 
 const (
-	webURLEnvKey      = "WEB_URL"
 	configPathEnvKey  = "CONFIG_PATH"
 	defaultConfigPath = "./config.json"
 )
 
 func main() {
-	config, err := loadConfig()
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+	config, err := loadConfig(watcher)
 	if err != nil {
 		log.Fatalf("load config error: %v", err)
 	}
@@ -30,16 +35,55 @@ func main() {
 	taskManager.Start()
 }
 
-func loadConfig() (model.Config, error) {
-	webURL := os.Getenv(webURLEnvKey)
-	if webURL == "" {
-		return model.Config{}, fmt.Errorf("WEB_URL not set")
-	}
+func loadConfig(watcher *fsnotify.Watcher) (*model.Config, error) {
 	configPath := os.Getenv(configPathEnvKey)
 	if configPath == "" {
 		configPath = defaultConfigPath
 	}
-	configFile, err := ioutil.ReadFile(configPath)
+
+	conf := &model.Config{}
+	go func(configPath string, conf *model.Config) {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+				if event.Has(fsnotify.Write) {
+					c, err := loadConfigFromFile(configPath)
+					if err != nil {
+						log.Println("error:", err)
+					} else {
+						*conf = c
+						log.Println("Reload config")
+					}
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}(configPath, conf)
+
+	err := watcher.Add(configPath)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("watching config file: %s", configPath)
+
+	c, err := loadConfigFromFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	*conf = c
+	return conf, nil
+}
+
+func loadConfigFromFile(path string) (model.Config, error) {
+	configFile, err := ioutil.ReadFile(path)
 	if err != nil {
 		return model.Config{}, fmt.Errorf("Read from config file error: %v", err)
 	}
