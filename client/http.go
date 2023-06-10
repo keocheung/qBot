@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"qb-monitor/util/logger"
 )
 
 type HTTPClient interface {
@@ -25,7 +25,7 @@ type httpClient struct {
 func (c *httpClient) Get(url string, headers map[string]string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		log.Printf("get %s error: %v", url, err)
+		logger.Errorf("get %s error: %v", url, err)
 		return nil, err
 	}
 	for key, header := range headers {
@@ -33,13 +33,13 @@ func (c *httpClient) Get(url string, headers map[string]string) ([]byte, error) 
 	}
 	rsp, err := client.Do(req)
 	if err != nil {
-		log.Printf("get %s error: %v", url, err)
+		logger.Errorf("get %s error: %v", url, err)
 		return nil, err
 	}
 	defer rsp.Body.Close()
 	body, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		log.Printf("get %s error: %v", url, err)
+		logger.Errorf("get %s error: %v", url, err)
 		return nil, err
 	}
 	if rsp.StatusCode != http.StatusOK {
@@ -51,7 +51,7 @@ func (c *httpClient) Get(url string, headers map[string]string) ([]byte, error) 
 func (c *httpClient) Post(url string, body []byte, headers map[string]string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
-		log.Printf("post %s error: %v", url, err)
+		logger.Infof("post %s error: %v", url, err)
 		return nil, err
 	}
 	for key, header := range headers {
@@ -59,13 +59,13 @@ func (c *httpClient) Post(url string, body []byte, headers map[string]string) ([
 	}
 	rsp, err := client.Do(req)
 	if err != nil {
-		log.Printf("post %s error: %v", url, err)
+		logger.Infof("post %s error: %v", url, err)
 		return nil, err
 	}
 	defer rsp.Body.Close()
 	rspBody, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		log.Printf("post %s error: %v", url, err)
+		logger.Infof("post %s error: %v", url, err)
 		return nil, err
 	}
 	if rsp.StatusCode != http.StatusOK {

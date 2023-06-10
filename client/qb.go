@@ -3,12 +3,12 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/url"
 	"strconv"
 	"strings"
 
 	"qb-monitor/model"
+	"qb-monitor/util/logger"
 )
 
 type QbClient interface {
@@ -35,7 +35,7 @@ type qbClient struct {
 func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 	u, err := url.Parse(c.webURL)
 	if err != nil {
-		log.Printf("url.Parse error: %v", err)
+		logger.Errorf("url.Parse error: %v", err)
 		return nil, err
 	}
 	u = u.JoinPath("/api/v2/torrents/info")
@@ -48,13 +48,13 @@ func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 		"Cookie": "SID=" + c.apiKey,
 	})
 	if err != nil {
-		log.Printf("httpClient.Get error: %v", err)
+		logger.Errorf("httpClient.Get error: %v", err)
 		return nil, err
 	}
 	var result = []model.Torrent{}
 	err = json.Unmarshal(rsp, &result)
 	if err != nil {
-		log.Printf("json.Unmarshal error: %v", err)
+		logger.Errorf("json.Unmarshal error: %v", err)
 		return nil, err
 	}
 	return result, nil
@@ -63,7 +63,7 @@ func (c *qbClient) GetTorrents(options model.Options) ([]model.Torrent, error) {
 func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit int) error {
 	u, err := url.Parse(c.webURL)
 	if err != nil {
-		log.Printf("url.Parse error: %v", err)
+		logger.Infof("url.Parse error: %v", err)
 		return err
 	}
 	u = u.JoinPath("/api/v2/torrents/setShareLimits")
@@ -74,7 +74,7 @@ func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit
 		"Content-Type": "application/x-www-form-urlencoded",
 	})
 	if err != nil {
-		log.Printf("httpClient.Post error: %v", err)
+		logger.Infof("httpClient.Post error: %v", err)
 		return err
 	}
 	return nil

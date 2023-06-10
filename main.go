@@ -9,6 +9,7 @@ import (
 
 	"qb-monitor/client"
 	"qb-monitor/model"
+	"qb-monitor/util/logger"
 
 	"github.com/antonmedv/expr"
 	"github.com/fsnotify/fsnotify"
@@ -29,7 +30,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("load config error: %v", err)
 	}
-	log.Printf("config loaded: %+v", config)
+	logger.Infof("config loaded: %+v", config)
 	qbClient := client.NewQbClient(config.WebURL, config.APIKey)
 	taskManager := client.NewTaskManager(config, qbClient)
 	taskManager.Start()
@@ -49,21 +50,21 @@ func loadConfig(watcher *fsnotify.Watcher) (*model.Config, error) {
 				if !ok {
 					return
 				}
-				log.Println("event:", event)
+				logger.Infof("event:", event)
 				if event.Has(fsnotify.Write) {
 					c, err := loadConfigFromFile(configPath)
 					if err != nil {
-						log.Println("error:", err)
+						logger.Errorf("error:", err)
 					} else {
 						*conf = c
-						log.Println("Reload config")
+						logger.Infof("Reload config")
 					}
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
 				}
-				log.Println("error:", err)
+				logger.Errorf("error:", err)
 			}
 		}
 	}(configPath, conf)
@@ -72,7 +73,7 @@ func loadConfig(watcher *fsnotify.Watcher) (*model.Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("watching config file: %s", configPath)
+	logger.Infof("watching config file: %s", configPath)
 
 	c, err := loadConfigFromFile(configPath)
 	if err != nil {
