@@ -22,6 +22,7 @@ type Logger interface {
 }
 
 var levelMap = map[string]level{
+	"DEBUG": levelDebug,
 	"INFO":  levelInfo,
 	"WARN":  levelWarn,
 	"ERROR": levelError,
