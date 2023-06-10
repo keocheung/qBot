@@ -40,7 +40,7 @@ var checkTorrent = func(conf *model.Config, qbClient QbClient) error {
 		Reverse: true,
 	})
 	if err != nil {
-		logger.Infof("get torrents error: %v", err)
+		logger.Errorf("get torrents error: %v", err)
 		return err
 	}
 	for _, torrent := range torrents {

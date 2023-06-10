@@ -59,7 +59,7 @@ func shouldPrint(l level) bool {
 	levelConfigStr := os.Getenv(levelConfigEnvKey)
 	levelConfig, ok := levelMap[levelConfigStr]
 	if !ok {
-		return true
+		return l >= levelInfo
 	}
 	return l >= levelConfig
 }
