@@ -3,4 +3,5 @@
 build/
 qb-monitor
 config.json
+config.yaml
 __debug_bin

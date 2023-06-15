@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"qb-monitor/client"
 	"qb-monitor/model"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/fsnotify/fsnotify"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -89,8 +91,16 @@ func loadConfigFromFile(path string) (model.Config, error) {
 		return model.Config{}, fmt.Errorf("Read from config file error: %v", err)
 	}
 	var c model.Config
-	if err := json.Unmarshal(configFile, &c); err != nil {
-		return model.Config{}, fmt.Errorf("Unmarshal config file error: %v", err)
+	if strings.HasSuffix(path, ".json") {
+		if err := json.Unmarshal(configFile, &c); err != nil {
+			return model.Config{}, fmt.Errorf("Unmarshal config file error: %v", err)
+		}
+	} else if strings.HasSuffix(path, ".yaml") || strings.HasSuffix(path, ".yml") {
+		if err := yaml.Unmarshal(configFile, &c); err != nil {
+			return model.Config{}, fmt.Errorf("Unmarshal config file error: %v", err)
+		}
+	} else {
+		return c, fmt.Errorf("config file name should end with json, yaml or yml")
 	}
 	for _, v := range c.Rules {
 		evaluator, err := expr.Compile(v.Condition)
