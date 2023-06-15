@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo docker build -t qb-monitor:latest .
+sudo docker build -t qbot:latest .

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"qb-monitor/util/logger"
+	"qbot/util/logger"
 )
 
 type HTTPClient interface {

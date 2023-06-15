@@ -1,2 +1,2 @@
-# qb-monitor
-### A custom monitor for qBittorrent
+# qBot
+### A custom robot for qBittorrent

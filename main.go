@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"qb-monitor/client"
-	"qb-monitor/model"
-	"qb-monitor/util/logger"
+	"qbot/client"
+	"qbot/model"
+	"qbot/util/logger"
 
 	"github.com/antonmedv/expr"
 	"github.com/fsnotify/fsnotify"

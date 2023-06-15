@@ -1,4 +1,4 @@
-module qb-monitor
+module qbot
 
 go 1.16
 

@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"qb-monitor/model"
-	"qb-monitor/util/logger"
+	"qbot/model"
+	"qbot/util/logger"
 )
 
 type QbClient interface {

@@ -5,13 +5,13 @@ import (
 	"sync"
 	"time"
 
-	"qb-monitor/model"
-	"qb-monitor/util/logger"
+	"qbot/model"
+	"qbot/util/logger"
 
 	"github.com/antonmedv/expr"
 )
 
-// TaskManager is the task manager of qb-monitor
+// TaskManager is the task manager of qbot
 type TaskManager interface {
 	Start() // Start the task manager
 }

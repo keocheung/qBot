@@ -1,7 +1,7 @@
 .DS_Store
 .vscode/
 build/
-qb-monitor
+qbot
 config.json
 config.yaml
 __debug_bin
