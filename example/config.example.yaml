@@ -1,0 +1,10 @@
+web_url: http://127.0.0.1:8080
+api_key:
+get_torrents:
+  limit: 20
+  sort: added_on
+  reverse: true
+rules:
+  - condition: "Category == 'Movie' || any(Tags, {# == 'Private' || # == 'Public'})) && MaxRatio == -1"
+    action:
+      max_ratio: 2.0

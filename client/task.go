@@ -35,9 +35,10 @@ var checkTorrent = func(conf *model.Config, qbClient QbClient) error {
 		return fmt.Errorf("config is nil")
 	}
 	torrents, err := qbClient.GetTorrents(model.Options{
-		Limit:   10,
-		Sort:    "added_on",
-		Reverse: true,
+		// TODO: set default values
+		Limit:   conf.GetTorrents.Limit,
+		Sort:    conf.GetTorrents.Sort,
+		Reverse: conf.GetTorrents.Reverse,
 	})
 	if err != nil {
 		logger.Errorf("get torrents error: %v", err)

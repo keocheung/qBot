@@ -16,13 +16,13 @@ type Torrent struct {
 }
 
 type TorrentAction struct {
-	MaxRatio *float32 `json:"max_ratio"`
+	MaxRatio *float32 `json:"max_ratio" yaml:"max_ratio"`
 }
 
 type Tags []string
 
 func (t *Tags) UnmarshalJSON(b []byte) error {
-	*t = strings.Split(string(b), ",")
+	*t = strings.Split(string(b[1:len(b)-1]), ", ")
 	return nil
 }
 

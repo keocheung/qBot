@@ -15,34 +15,39 @@ func TestRules(t *testing.T) {
 	}{{
 		name: "test1",
 		rule: Rule{
-			Condition: "Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})",
+			Condition: "(Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})) && MaxRatio == -1",
 		},
 		torrent: Torrent{
 			Category: "Bangumi",
+			MaxRatio: -1,
 		},
 		want: true,
 	}, {
 		name: "test2",
 		rule: Rule{
-			Condition: "Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})",
+			Condition: "(Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})) && MaxRatio == -1",
 		},
 		torrent: Torrent{
+			Category: "Music",
 			Tags: []string{
 				"VCB",
 				"Normal",
 			},
+			MaxRatio: -1,
 		},
 		want: true,
 	}, {
 		name: "test2",
 		rule: Rule{
-			Condition: "Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})",
+			Condition: "(Category == 'Bangumi' || any(Tags, {# == 'VCB' || # == 'Public'})) && MaxRatio == -1",
 		},
 		torrent: Torrent{
+			Category: "Music",
 			Tags: []string{
 				"Music",
 				"Movie",
 			},
+			MaxRatio: -1,
 		},
 		want: false,
 	}}
