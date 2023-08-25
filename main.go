@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -86,7 +85,7 @@ func loadConfig(watcher *fsnotify.Watcher) (*model.Config, error) {
 }
 
 func loadConfigFromFile(path string) (model.Config, error) {
-	configFile, err := ioutil.ReadFile(path)
+	configFile, err := os.ReadFile(path)
 	if err != nil {
 		return model.Config{}, fmt.Errorf("Read from config file error: %v", err)
 	}
