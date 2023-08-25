@@ -11,7 +11,7 @@ services:
     container_name: qbot
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /volume1/docker/qbot/config.yaml:/config/config.yaml # YAML config file location. Support YAML & JSON
+      - ./config.yaml:/config/config.yaml # YAML config file location. Support YAML & JSON
     environment:
       - CONFIG_PATH=/config/config.yaml # Optional. Default is ./config.yaml
     network_mode: bridge
