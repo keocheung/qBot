@@ -67,9 +67,12 @@ func (c *qbClient) SetShareLimits(hashes []string, ratioLimit float32, timeLimit
 		return err
 	}
 	u = u.JoinPath("/api/v2/torrents/setShareLimits")
-	data := fmt.Sprintf("hashes=%s&ratioLimit=%f&seedingTimeLimit=%d",
-		strings.Join(hashes, "|"), ratioLimit, timeLimit)
-	_, err = c.httpClient.Post(u.String(), []byte(data), map[string]string{
+	param := url.Values{}
+	param.Set("hashes", strings.Join(hashes, "|"))
+	param.Set("ratioLimit", fmt.Sprintf("%.1f", ratioLimit))
+	param.Set("seedingTimeLimit", strconv.Itoa(timeLimit))
+	param.Set("inactiveSeedingTimeLimit", "-1")
+	_, err = c.httpClient.Post(u.String(), []byte(param.Encode()), map[string]string{
 		"Cookie":       "SID=" + c.apiKey,
 		"Content-Type": "application/x-www-form-urlencoded",
 	})

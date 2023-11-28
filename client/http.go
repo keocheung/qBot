@@ -3,7 +3,7 @@ package client
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"qbot/util/logger"
 )
@@ -37,7 +37,7 @@ func (c *httpClient) Get(url string, headers map[string]string) ([]byte, error) 
 		return nil, err
 	}
 	defer rsp.Body.Close()
-	body, err := ioutil.ReadAll(rsp.Body)
+	body, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		logger.Errorf("get %s error: %v", url, err)
 		return nil, err
@@ -63,7 +63,7 @@ func (c *httpClient) Post(url string, body []byte, headers map[string]string) ([
 		return nil, err
 	}
 	defer rsp.Body.Close()
-	rspBody, err := ioutil.ReadAll(rsp.Body)
+	rspBody, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		logger.Infof("post %s error: %v", url, err)
 		return nil, err
