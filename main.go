@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"qbot/client"
+	"qbot/internal/meta"
 	"qbot/model"
 	"qbot/util/logger"
 
@@ -22,6 +23,7 @@ const (
 )
 
 func main() {
+	logger.Infof("rss-bell %s", meta.Version)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)

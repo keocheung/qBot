@@ -1,8 +1,8 @@
-FROM golang:1.20.2-alpine3.17 as builder
+FROM golang:alpine as builder
 ADD . /go/src/qbot
 WORKDIR /go/src/qbot
-RUN go install -ldflags="-s -w"
+RUN go install -ldflags="-s -w -X qbot/internal/meta.Version=$(git describe --tags)"
 
-FROM alpine:3.17
+FROM alpine
 COPY --from=builder /go/bin/qbot /app/qbot
 ENTRYPOINT ["/app/qbot"]
