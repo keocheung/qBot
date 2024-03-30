@@ -23,7 +23,7 @@ const (
 )
 
 func main() {
-	logger.Infof("rss-bell %s", meta.Version)
+	logger.Infof("%s %s", meta.AppName, meta.Version)
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
