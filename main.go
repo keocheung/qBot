@@ -34,7 +34,10 @@ func main() {
 		log.Fatalf("load config error: %v", err)
 	}
 	logger.Infof("config loaded: %+v", config)
-	qbClient := client.NewQbClient(config.WebURL, config.APIKey)
+	qbClient, err := client.NewQbClient(config.WebURL, config.APIKey)
+	if err != nil {
+		log.Fatalf("qBittorrent web URL malformed: %s", config.WebURL)
+	}
 	taskManager := client.NewTaskManager(config, qbClient)
 	taskManager.Start()
 }

@@ -64,11 +64,20 @@ var checkTorrent = func(conf *model.Config, qbClient QbClient) error {
 }
 
 func execTorrentAction(qbClient QbClient, torrent model.Torrent, action model.TorrentAction) error {
+	if action.State != "" {
+		switch action.State {
+		case model.TorrentStateStop:
+			if err := qbClient.StopTorrents([]string{torrent.Hash}); err != nil {
+				return err
+			}
+			logger.Infof("stopped torrent %s", torrent.Hash)
+		}
+	}
 	if action.MaxRatio != nil {
 		if err := qbClient.SetShareLimits([]string{torrent.Hash}, *action.MaxRatio, torrent.MaxSeedingTime); err != nil {
 			return err
 		}
-		logger.Infof("set share limit for %s (%s) to %f", torrent.Hash, torrent.Name, *action.MaxRatio)
+		logger.Infof("set share limit to %f for %s (%s)", torrent.Hash, torrent.Name, *action.MaxRatio)
 	}
 	return nil
 }
