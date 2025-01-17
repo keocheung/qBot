@@ -1,6 +1,6 @@
 package model
 
-import "github.com/antonmedv/expr/vm"
+import "github.com/expr-lang/expr/vm"
 
 // Config is the configuration for the monitor
 type Config struct {

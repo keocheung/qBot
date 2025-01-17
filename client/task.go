@@ -8,7 +8,7 @@ import (
 	"qbot/model"
 	"qbot/util/logger"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 )
 
 // TaskManager is the task manager of qbot

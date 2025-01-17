@@ -19,7 +19,7 @@ services:
 
 ## Usage
 ### Config File Example
-qBot uses [Expr](https://github.com/antonmedv/expr) as condition expression parser. Please refer to [Expr](https://github.com/antonmedv/expr) for more documents.
+qBot uses [Expr](https://github.com/expr-lang/expr) as condition expression parser. Please refer to [Expr](https://github.com/expr-lang/expr) for more documents.
 ```yaml
 web_url: http://127.0.0.1:8080
 api_key: abc123

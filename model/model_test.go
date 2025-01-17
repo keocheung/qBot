@@ -3,7 +3,7 @@ package model
 import (
 	"testing"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 )
 
 func TestRules(t *testing.T) {
