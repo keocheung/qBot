@@ -12,7 +12,7 @@ import (
 	"qbot/model"
 	"qbot/util/logger"
 
-	"github.com/antonmedv/expr"
+	"github.com/expr-lang/expr"
 	"github.com/fsnotify/fsnotify"
 	"gopkg.in/yaml.v3"
 )
